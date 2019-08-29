@@ -8,22 +8,22 @@
 # =============================================================
 
 """
-File:     doi2bib.py
+File:     papers.py
 Created:  2017-03-27 18:19
 """
 
-import subprocess
-import webbrowser
-import colorama
-import inquirer
-import requests
-import logging
 import click
+import colorama
 import glob
-import yaml
-import sys
-import re
+import inquirer
+import logging
 import os
+import re
+import requests
+import subprocess
+import sys
+import webbrowser
+import yaml
 #
 import bibtexparser.customization as bibcustomization
 import bibtexparser.bparser as bibparser
@@ -47,12 +47,19 @@ if os.path.exists(basepath):
         os.mkdir(notes_path)
 
     
-# class Bibliotk(object):
+class Papers(object):
 
-    # """Docstring for Bibliotk. """
+    """Docstring for Papers. """
 
-    # def __init__(self):
-        # """TODO: to be defined1. """
+    def __init__(self):
+        """TODO: to be defined1. """
+        pass
+
+    def initiliaze_db(self):
+        """Doc"""
+        pass
+
+
 # }}}
 
 
