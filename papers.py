@@ -8,7 +8,7 @@
 # =============================================================
 
 """
-File:     doi2bib.py
+File:     papers.py
 Created:  2017-03-27 18:19
 """
 
@@ -47,12 +47,19 @@ if os.path.exists(basepath):
         os.mkdir(notes_path)
 
     
-# class Bibliotk(object):
+class Papers(object):
 
-    # """Docstring for Bibliotk. """
+    """Docstring for Papers. """
 
-    # def __init__(self):
-        # """TODO: to be defined1. """
+    def __init__(self):
+        """TODO: to be defined1. """
+        pass
+
+    def initiliaze_db(self):
+        """Doc"""
+        pass
+
+
 # }}}
 
 
