@@ -7,9 +7,13 @@
 #  Distributed under terms of the GNU/GPL license.
 # =============================================================
 
+
 """
-File:     papers.py
-Created:  2017-03-27 18:19
+File: papers.py
+Author: Daniel Santiago
+Email: dspelaez@gmail.com
+Github: https://github.com/dspelaez
+Description: 
 """
 
 import click
@@ -29,6 +33,7 @@ import bibtexparser.customization as bibcustomization
 import bibtexparser.bparser as bibparser
 
 # config logging
+
 
 
 # --- configuration class ---
