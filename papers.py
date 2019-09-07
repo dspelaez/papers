@@ -9,7 +9,6 @@
 
 
 """
-File: papers.py
 Author: Daniel Santiago
 Email: dspelaez@gmail.com
 Github: https://github.com/dspelaez
@@ -33,8 +32,7 @@ import bibtexparser.customization as bibcustomization
 import bibtexparser.bparser as bibparser
 
 # config logging
-
-
+logging.basicConfig(level=logging.DEBUG)
 
 # --- configuration class ---
 # class to handle configuration {{{
@@ -54,19 +52,62 @@ if os.path.exists(basepath):
     
 class Papers(object):
 
-    """Docstring for Papers. """
+    """
+    Papers is a homemade bibliography manager.
+    """
 
     def __init__(self):
-        """TODO: to be defined1. """
-        pass
+        """Constructor"""
+        
+        # initial folder
+        self.home_path = os.path.expanduser("~")
+        self.config_path = os.path.join(self.home_path, ".config/papers")
+        self._create_folder(self.config_path)
 
-    def initiliaze_db(self):
-        """Doc"""
-        pass
+        # default configuration
+        self.default_conf = {
+            "folders":
+                {
+                "library": os.path.join(self.home_path, "library/papers"),
+                "metadata": os.path.join(self.home_path, "library/papers/.metadata"),
+                "notes": os.path.join(self.home_path, "library/papers/.notes"),
+                }
+            }
+
+        # create or read config file
+        self.config_file = os.path.join(self.config_path, "papers.yml")
+        if os.path.isfile(self.config_file):
+            #
+            logging.debug(f"Reading configuration file at {self.config_file}.")
+            self.config = self._read_config_file()
+        else:
+            #
+            # create a new file
+            with open(self.config_file, "w") as f:
+                #
+                logging.debug("Writing new configuration file.")
+                #
+                f.write("# papers configuration file\n\n")
+                yaml.safe_dump(self.default_conf, f)
+                self.config = self.default_conf
 
 
+    def _read_config_file(self):
+        """Read config file."""
+        with open(self.config_file, "r") as f:
+            return yaml.safe_load(f)
+
+
+    def _create_folder(self, folder):
+        """Create folder if dont exist."""
+
+        if not os.path.isdir(folder):
+            logging.debug(f"Creating folder {folder}.")
+            os.mkdir(folder)
+        else:
+            logging.debug(f"Folder {folder} already exists.")
+        
 # }}}
-
 
 
 # --- functions to handle data ---
@@ -238,7 +279,13 @@ def cli():
 @cli.command("add")
 @click.argument("doi")
 def add(doi):
-    """Add entry to the library."""
+    """Add entry to the library.
+    
+    This functions takes one or two arguments. The doi and the pdf file path.
+    If the doi is given, the program will try to download the pdf file. If the
+    pdf is given but not the doi, the program will ask you the doi, if not is
+    given again, the program will open the editor will empty fields.
+    """
 
     # if doi was passed as an argument
     if doi:
@@ -286,7 +333,15 @@ def add(doi):
 @click.argument("key")
 def openpdf(key):
     """Open the PDF file.""" 
-    
+   
+    # check the opener according to the os
+    if sys.platform.startswith('darwin'):
+        opener = "open"
+    elif os.name == 'nt':
+        opener = "start"
+    elif os.name == 'posix':
+        opener = "xdg-open"
+
     # get the filename
     filename = os.path.join(basepath, f"{key}.pdf")
     if os.path.isfile(filename):
@@ -338,4 +393,5 @@ def list():
 
 if __name__ == "__main__":
     
+    p = Papers()
     cli()
