@@ -13,13 +13,13 @@ Distributed under terms of the GNU/GPL 3.0 license.
 
 
 import re
-import PyPDF2 as pypdf
 import glob
 import logging
 
-logger = logging.getLogger("doi")
+# logger = logging.getLogger("doi")
 
 
+# pdf to doi {{{
 def pdf_to_doi(filepath):
     """Try to get doi from a filepath, it looks for a regex in the binary
     data and returns the first doi found, in the hopes that this doi
@@ -37,8 +37,9 @@ def pdf_to_doi(filepath):
             if doi:
                 break
     return doi
+# }}}
 
-
+# validate doi {{{
 def validate_doi(doi):
     """We check that the DOI can be resolved by official means.  If so, we
     return the resolved URL, otherwise, we return None (which means the DOI is
@@ -74,8 +75,9 @@ def validate_doi(doi):
         raise ValueError('HTTP 404: DOI not found')
     else:
         raise ValueError('Something unexpected happened')
+# }}}
 
-
+# get clean doi {{{
 def get_clean_doi(doi):
     """Check if doi is actually a url and in that case just get
     the exact doi.
@@ -90,12 +92,12 @@ def get_clean_doi(doi):
     doi = re.sub(r'(/abstract)', '', doi)
     doi = re.sub(r'\)$', '', doi)
     return doi
+# }}}
 
-
+# find doi in text {{{
 def find_doi_in_text(text):
-    """
-    Try to find a doi in a text
-    """
+    """Try to find a doi in a text."""
+
     text = get_clean_doi(text)
     forbidden_doi_characters = r'"\s%$^\'<>@,;:#?&'
     # Sometimes it is in the javascript defined
@@ -120,29 +122,8 @@ def find_doi_in_text(text):
         except StopIteration:
             pass
     return None
-
+# }}}
 
 
 if __name__ == "__main__":
-    
-    list_of_files = glob.glob("/Users/danielsantiago/Desktop/biblio_ifremer/*.pdf")
-
-    with open("output.txt", "w") as fout:
-        i = 0
-        for filename in list_of_files:
-            with open(filename, "rb") as pdf:
-                try:
-                    pdfReader = pypdf.PdfFileReader(pdf)
-                    page = pdfReader.getPage(0)
-                    text = page.extractText()
-                    doi = find_doi_in_text(text)
-                    try:
-                        validate_doi(doi)
-                        fout.write(f"{filename.split('/')[-1]}; {doi}\n")
-                        i += 1
-                    except:
-                        pass
-                except:
-                    pass
-
-        fout.write(f"{i} out of {len(list_of_files)} doi's found")
+   pass 

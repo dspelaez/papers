@@ -14,11 +14,14 @@ Distributed under terms of the GNU/GPL 3.0 license.
 import click
 import logging
 import subprocess
+import shutil
+import yaml
 import glob
 import sys
 import os
 #
 from papers import utils
+from papers import getdoi
 from papers.config import PapersConfig
 
 # config logging
@@ -42,42 +45,33 @@ def add(doi, pdf=None):
     This functions takes one or two arguments. The doi and the pdf file path.
     If the doi is given, the program will try to download the pdf file. If the
     pdf is given but not the doi, the program will ask you the doi, if not is
-    given again, the program will open the editor will empty fields.
+    given again, the program will open the editor with empty fields.
     """
 
-    # check if doi can be retrieved from the internet
-    click.echo("Looking for DOI in the internet\n")
-    try:
-        bib = utils.bibtex_from_doi(doi)
-    except:
-        logging.error(f"DOI: {doi} could not be retreived")
-        raise Exception("DOI could not be retrieved")
+    # if doi was passed as an argument
+    if doi:
+        # add entry to the database
+        entry = utils.add_entry_from_doi(doi)
+        print(utils.display_entry(entry))
     
-    # parse to a python dictionary
-    try:
-        dic = utils.bibtex_to_dict(bib)
-        click.echo(utils.display_entry(dic))
-    except:
-        logging.error(f"DOI: {doi} could not be parsed")
-        raise Exception("DOI could not be parsed")
+        # if pdf was passed
+        if pdf:
+            try:
+                logging.debug("Copying PDF file to the database")
+                shutil.copy(pdf, dic["file"])
+            except:
+                logging.error("PDF file could not be copied")
+            
+        # if pdf was not passed we try to download from scihub
+        else:
+            utils.download_from_scihub(entry)
 
-    # write metadata to yaml file
-    utils.write_to_yaml(dic)
-    # # 
-    # question = [
-            # # inquirer.Confirm('edit_yaml', 
-            # # message="Do you want to edit the entry?"),
-            # # #
-            # inquirer.Confirm('download_pdf', 
-            # message="Do you want to download the PDF?")
-            # ]
-    # answer = inquirer.prompt(question)
-
-    # # if answer["edit_yaml"]:
-        # # edit(dic["ID"])
-
-    # if answer["download_pdf"]:
-        # utils.download_from_scihub(dic)
+    # if doi was not passed as an argument
+    else:
+        # try to get the doi from the pdf
+        doi = getdoi.pdf_to_doi(pdf)
+        entry = utils.add_entry_from_doi(doi)
+        print(utils.display_entry(entry))
 
 # }}}
 
@@ -93,13 +87,13 @@ def openpdf(key):
     elif os.name == 'nt':
         opener = "start"
     elif os.name == 'posix':
-        opener = "xdg-open"
+        opener = "zathura"
 
     # get the filename
     library_path = cfg.config["folders"]["library"]
     filename = os.path.join(library_path, f"{key}.pdf")
     if os.path.isfile(filename):
-        subprocess.call(["open", filename])
+        subprocess.call([opener, filename])
     else:
         logging.error(f"File {filename} not found")
 # }}}
@@ -146,7 +140,20 @@ def list():
             entries += [entry]
         #
         click.echo(utils.display_entry(entry))
-    # }}}
+# }}}
+
+# search {{{
+@cli.command("search")
+def search():
+    pass
+# }}}
+
+# doctor {{{
+@cli.command("doctor")
+def doctor():
+    pass
+# }}}
+
 
 if __name__ == "__main__":
     cli()

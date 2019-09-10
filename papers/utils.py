@@ -15,9 +15,7 @@ import os
 import re
 import sys
 import glob
-
 import colorama
-import inquirer
 import logging
 import requests
 import webbrowser
@@ -134,13 +132,41 @@ def bibtex_to_dict(bib):
 
 # write entry to yaml file {{{
 def write_to_yaml(entry):
-    """Export entry or entrys to a bibtex file"""
+    """Export entry or entries to a bibtex file"""
     
     metadata_path = cfg.config["folders"]["metadata"]
     filename = os.path.join(metadata_path, f"{entry['ID']}.yaml")
     with open(filename, "w") as f:
         yaml.dump(entry, f, default_flow_style=False)
 
+# }}}
+
+# add entry from doi {{{
+def add_entry_from_doi(doi):
+    """Add new entry to the database for a given doi"""
+
+    # check if doi can be retrieved from the internet
+    try:
+        bib = bibtex_from_doi(doi)
+    except:
+        logging.error(f"DOI: {doi} could not be retreived")
+        raise Exception("DOI could not be retrieved")
+    
+    # parse to a python dictionary
+    try:
+        dic = bibtex_to_dict(bib)
+    except:
+        logging.error(f"DOI: {doi} could not be parsed")
+        raise Exception("DOI could not be parsed")
+
+    # write metadata to yaml file
+    try:
+        write_to_yaml(dic)
+    except:
+        logging.error(f"DOI: {doi} could not be written to YAML")
+        raise Exception("DOI could not be written to YAML")
+
+    return dic
 # }}}
 
 # download from sci-hub {{{
@@ -185,7 +211,10 @@ def display_entry(entry, plain=False):
     author_str = GREEN + ", ".join(entry["author"]) + " "
     author_str += GREEN + f"({entry['year']})\n"
     title_str = WHITE + f"{entry['title']}\n"
-    journal_str = RED + f"{entry['journal']}\n"
+    try:
+        journal_str = RED + f"{entry['journal']}\n"
+    except:
+        journal_str = RED + f"{entry['booktitle']}\n"
 
     return key_str + author_str + title_str + journal_str 
 # }}}
