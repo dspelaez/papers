@@ -19,10 +19,9 @@ setup(
         'pyyaml',
         'inquirer',
         'colorama',
-        'scihub'
     ],
     entry_points='''
         [console_scripts]
-        papers=papers:cli
+        papers=papers.cli:cli
     ''',
 )

@@ -1,19 +1,20 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
-#
-# Copyright © 2019 Daniel Santiago <dpelaez@cicese.edu.mx>
-#
-# Distributed under terms of the GNU/GPL license.
 
 """
+Copyright © 2019 Daniel Santiago <http://github.com/dspelaez>
+Distributed under terms of the GNU/GPL 3.0 license.
 
+@author: Daniel Santiago
+@github: http://github.com/dspelaez
+@created: 2019-09-09
 """
 
-import PyPDF2 as pypdf
-import glob
 
 import re
+import PyPDF2 as pypdf
+import glob
 import logging
 
 logger = logging.getLogger("doi")
