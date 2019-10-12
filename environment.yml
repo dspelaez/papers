@@ -11,5 +11,6 @@ dependencies:
     - click==7.0
     - colorama==0.4.1
     - inquirer==2.6.3
+    - PyPDF2==1.26.0
     - pyyaml==5.1.2
     - requests==2.22.0

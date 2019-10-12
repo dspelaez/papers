@@ -12,31 +12,35 @@ Distributed under terms of the GNU/GPL 3.0 license.
 """
 
 
-import re
-import glob
 import logging
+import glob
+import re
+import PyPDF2 as pypdf
 
-# logger = logging.getLogger("doi")
+logger = logging.getLogger("doi")
 
 
 # pdf to doi {{{
-def pdf_to_doi(filepath):
-    """Try to get doi from a filepath, it looks for a regex in the binary
-    data and returns the first doi found, in the hopes that this doi
-    is the correct one.
-
-    :param filepath: Path to the pdf file
-    :type  filepath: str
-    :returns: DOI or None
-    :rtype:  str or None
+def pdf_to_doi(pdf):
+    """Try to get doi from a filepath
+    
+    It uses the PyPDF2 to convert the pdf to text and then try to extrack the
+    doi using a regex math taken from papis/papis project.
     """
-    doi = None
-    with open(filepath, 'rb') as fd:
-        for line in fd:
-            doi = find_doi_in_text(line.decode('ascii', errors='ignore'))
-            if doi:
-                break
-    return doi
+
+    try:
+        pdfReader = pypdf.PdfFileReader(pdf)
+        page = pdfReader.getPage(0)
+        text = page.extractText()
+        doi = find_doi_in_text(text)
+        try:
+            validate_doi(doi)
+            return doi
+        except:
+            logger.debug(f"Invalid DOI={doi}")
+    except:
+        logger.debug("DOI could not be parsed")
+
 # }}}
 
 # validate doi {{{

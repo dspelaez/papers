@@ -19,6 +19,7 @@ import colorama
 import logging
 import requests
 import webbrowser
+import click
 import yaml
 #
 import bibtexparser.customization as bibcustomization
@@ -67,7 +68,10 @@ def clean_bibtex_entry(entry):
     """Try to clean the bibtex entries when possible"""
 
     # add filename field when the file is located or downloaded
-    entry["file"] = get_pdf_filename(entry)
+    # here we add the file but replacing /home/danielsantiago by the
+    # symbol ~ in order to matain compatibility with other computers
+    pdf_filename = get_pdf_filename(entry)
+    entry["file"] = pdf_filename.replace(os.path.expanduser('~'), '~', 1)
 
     # remove link field if exist
     if "link" in entry:
@@ -149,22 +153,19 @@ def add_entry_from_doi(doi):
     try:
         bib = bibtex_from_doi(doi)
     except:
-        logging.error(f"DOI: {doi} could not be retreived")
         raise Exception("DOI could not be retrieved")
     
     # parse to a python dictionary
     try:
         dic = bibtex_to_dict(bib)
     except:
-        logging.error(f"DOI: {doi} could not be parsed")
         raise Exception("DOI could not be parsed")
 
     # write metadata to yaml file
     try:
         write_to_yaml(dic)
     except:
-        logging.error(f"DOI: {doi} could not be written to YAML")
-        raise Exception("DOI could not be written to YAML")
+        raise Exception(f"DOI: {doi} could not be written to YAML")
 
     return dic
 # }}}
@@ -182,12 +183,15 @@ def download_from_scihub(entry):
             pdflink = line.decode().split()[3].replace('"', '')
 
     link_request = requests.get(pdflink)
-    if b"adobe" in link_request.content:
+    content_type = link_request.headers.get('content-type')
+    if "application/pdf" in content_type:
         filename = get_pdf_filename(entry)
         with open(filename, "bw") as f:
             f.write(link_request.content)
+        click.echo("File succesfully dowloaded.")
+
     else:
-        logging.warning("File could not be dowloaded automatically.")
+        click.echo("File could not be dowloaded automatically.")
         webbrowser.open_new_tab(pdflink) 
 
 # }}}
@@ -200,12 +204,13 @@ def display_entry(entry, plain=False):
 
     # shorcuts to access colors quickly
     if plain:
-        RED, BLUE, GREEN, WHITE = "", "", "", ""
+        RED, BLUE, GREEN, WHITE, RESET = "", "", "", "", ""
     else:
         RED = colorama.Fore.RED
         BLUE = colorama.Fore.BLUE
         GREEN = colorama.Fore.GREEN
         WHITE = colorama.Fore.WHITE
+        RESET = colorama.Style.RESET_ALL
 
     key_str = BLUE + f"{entry['ID']}:\n" 
     author_str = GREEN + ", ".join(entry["author"]) + " "
@@ -216,7 +221,7 @@ def display_entry(entry, plain=False):
     except:
         journal_str = RED + f"{entry['booktitle']}\n"
 
-    return key_str + author_str + title_str + journal_str 
+    return key_str + author_str + title_str + journal_str + RESET
 # }}}
 
 if __name__ == "__main__":

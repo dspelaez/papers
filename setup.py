@@ -16,6 +16,7 @@ setup(
         'bibtexparser',
         'requests',
         'Click',
+        'PyPDF2',
         'pyyaml',
         'inquirer',
         'colorama',

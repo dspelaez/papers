@@ -14,6 +14,7 @@ Distributed under terms of the GNU/GPL 3.0 license.
 import click
 import logging
 import subprocess
+import colorama
 import shutil
 import yaml
 import glob
@@ -52,26 +53,34 @@ def add(doi, pdf=None):
     if doi:
         # add entry to the database
         entry = utils.add_entry_from_doi(doi)
-        print(utils.display_entry(entry))
-    
+        click.echo(utils.display_entry(entry))
+
         # if pdf was passed
         if pdf:
             try:
-                logging.debug("Copying PDF file to the database")
+                click.echo("Copying PDF file to the database")
                 shutil.copy(pdf, dic["file"])
             except:
-                logging.error("PDF file could not be copied")
+                click.echo(f"source: {pdf}")
+                click.echo(f"destination: {dic['file']}")
+                raise Exception("PDF file could not be copied")
             
         # if pdf was not passed we try to download from scihub
         else:
             utils.download_from_scihub(entry)
+        
+        # TODO: check if valid and edit
 
     # if doi was not passed as an argument
     else:
         # try to get the doi from the pdf
         doi = getdoi.pdf_to_doi(pdf)
-        entry = utils.add_entry_from_doi(doi)
-        print(utils.display_entry(entry))
+        try:
+            getdoi.validate_doi(doi)
+            entry = utils.add_entry_from_doi(doi)
+            print(utils.display_entry(entry))
+        except:
+            logging.error("DOI not found")
 
 # }}}
 
@@ -140,6 +149,31 @@ def list():
             entries += [entry]
         #
         click.echo(utils.display_entry(entry))
+# }}}
+
+# remove {{{
+@cli.command("remove")
+@click.argument("key")
+def remove(key):
+    """Remove the given entry."""
+
+    library_path = cfg.config["folders"]["library"]
+    pdf_file = os.path.join(library_path, f"{key}.pdf")
+    meta_file = os.path.join(library_path, f".metadata/{key}.yaml")
+
+    msg = "Do you want to remove entry " + colorama.Fore.BLUE + f"{key}?" + \
+            colorama.Style.RESET_ALL + " [Y/n] " 
+
+    for filename in [pdf_file, meta_file]:
+        if os.path.isfile(filename):
+            ans = input(msg)
+            if ans in ["", "Y", "y", "yes"]:
+                os.remove(filename)
+                click.echo(f"{key} succesfully removed")
+            else:
+                click.echo("Aborted!")
+
+
 # }}}
 
 # search {{{
