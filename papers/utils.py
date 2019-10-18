@@ -212,16 +212,36 @@ def display_entry(entry, plain=False):
         WHITE = colorama.Fore.WHITE
         RESET = colorama.Style.RESET_ALL
 
-    key_str = BLUE + f"{entry['ID']}:\n" 
-    author_str = GREEN + ", ".join(entry["author"]) + " "
-    author_str += GREEN + f"({entry['year']})\n"
-    title_str = WHITE + f"{entry['title']}\n"
-    try:
-        journal_str = RED + f"{entry['journal']}\n"
-    except:
-        journal_str = RED + f"{entry['booktitle']}\n"
+    # initial string
+    string = \
+        BLUE + f"[{entry['ENTRYTYPE']}] {entry['ID']}:\n" + \
+        GREEN + ", ".join(entry["author"]) + " " + \
+        GREEN + f"({entry['year']})\n" + \
+        WHITE + f"{entry['title']}\n"
 
-    return key_str + author_str + title_str + journal_str + RESET
+    # --- article
+    if entry["ENTRYTYPE"] == "article":
+        string += \
+            RED + f"{entry['journal']}\n" + RESET
+
+    # --- book
+    elif entry["ENTRYTYPE"] == "book":
+        string += \
+            RED + f"{entry['publisher']}\n" + RESET
+
+    # --- report
+    elif entry["ENTRYTYPE"] == "report":
+        pass
+
+    # --- thesis
+    elif entry["ENTRYTYPE"] == "thesis":
+        pass
+    
+    # --- so?
+    else:
+        return None
+
+    return string
 # }}}
 
 if __name__ == "__main__":
