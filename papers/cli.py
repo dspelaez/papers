@@ -143,7 +143,7 @@ def list():
     # open every yaml file
     entries = []
     list_of_files = glob.glob(metadata_path + "/*.yaml")
-    for fname in list_of_files:
+    for fname in sorted(list_of_files):
         with open(fname, "r") as f:
             entry = yaml.safe_load(f)
             entries += [entry]

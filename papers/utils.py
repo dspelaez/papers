@@ -200,8 +200,6 @@ def download_from_scihub(entry):
 def display_entry(entry, plain=False):
     """Returns a list with a pretty representation of the entry data."""
 
-    # TODO: validate the required fields
-
     # shorcuts to access colors quickly
     if plain:
         RED, BLUE, GREEN, WHITE, RESET = "", "", "", "", ""
