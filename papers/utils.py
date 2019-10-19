@@ -234,10 +234,19 @@ def display_entry(entry, plain=False):
     # --- thesis
     elif entry["ENTRYTYPE"] == "thesis":
         pass
+
+    # --- incolletion
+    elif entry["ENTRYTYPE"] == "incollection":
+        try:
+            string += \
+                RED + f"{entry['publisher']}\n" + RESET
+        except:
+            string += \
+                RED + f"{entry['booktitle']}\n" + RESET
     
     # --- so?
     else:
-        return None
+        pass
 
     return string
 # }}}
